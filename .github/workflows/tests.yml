@@ -1,0 +1,27 @@
+name: Unit tests
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ hashFiles('**/package-lock.json') }}
+      - name: install
+        run: npm ci
+      - name: test
+        run: npm test
+      - name: lint
+        run: npm run lint

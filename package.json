@@ -1,0 +1,112 @@
+{
+  "name": "inspector-elements",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Power of Browser DevTools inspectors right inside your React app",
+  "keywords": [
+    "devtools",
+    "inspector",
+    "object",
+    "object-inspector",
+    "react",
+    "react-component",
+    "reactjs",
+    "table",
+    "table-inspector",
+    "table-view",
+    "tableview",
+    "tree",
+    "tree-view",
+    "treeview",
+    "ui",
+    "view"
+  ],
+  "homepage": "https://github.com/elematic/inspector-elements",
+  "bugs": {
+    "url": "https://github.com/elematic/inspector-elements/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elematic/inspector-elements.git"
+  },
+  "license": "MIT",
+  "author": "Justin Fagnani <justin@elematic.dev> (http://github.com/justinfagnani)",
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/**/*",
+    "index.js",
+    "index.js.map",
+    "index.d.ts.map",
+    "index.d.ts.map"
+  ],
+  "scripts": {
+    "build": "wireit",
+    "build-storybook": "build-storybook",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts",
+    "prerelease": "npm run lint && npm run test",
+    "release": "npm publish . --access public",
+    "test": "wireit",
+    "serve": "wireit"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.17",
+    "@types/mocha": "^10.0.7",
+    "@typescript-eslint/eslint-plugin": "^5.30.4",
+    "@typescript-eslint/parser": "^5.30.4",
+    "@web/dev-server": "^0.4.6",
+    "@web/test-runner": "^0.18.3",
+    "@web/test-runner-puppeteer": "^0.16.0",
+    "chai": "^5.1.1",
+    "eslint": "^8.19.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "is-dom": "^1.1.0",
+    "prettier": "^2.1.1",
+    "typescript": "^5.5.4",
+    "wireit": "^0.14.7"
+  },
+  "dependencies": {
+    "lit": "^3.2.0"
+  },
+  "wireit": {
+    "build": {
+      "command": "tsc --pretty",
+      "files": [
+        "src/**/*.ts",
+        "tsconfig.json"
+      ],
+      "output": [
+        ".tsbuildinfo",
+        "index.{js|js.map}"
+      ],
+      "clean": "if-file-deleted"
+    },
+    "test": {
+      "command": "wtr test/**/*_test.js",
+      "dependencies": [
+        "build"
+      ],
+      "files": [],
+      "output": []
+    },
+    "serve": {
+      "command": "wds --node-resolve",
+      "service": true,
+      "dependencies": [
+        {
+          "script": "build",
+          "cascade": false
+        }
+      ],
+      "files": []
+    }
+  }
+}
