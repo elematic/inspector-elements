@@ -8,6 +8,8 @@
     "module": "NodeNext",
     "rootDir": "./src",
     "moduleResolution": "NodeNext",
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
     "resolvePackageJsonExports": true,
     "resolvePackageJsonImports": true,
     // "customConditions": [],

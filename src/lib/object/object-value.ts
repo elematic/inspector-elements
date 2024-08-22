@@ -44,7 +44,7 @@ export class ObjectValue extends LitElement {
   `;
 
   @property({attribute: false})
-  accessor data: unknown;
+  data: unknown;
 
   render() {
     const object = this.data;

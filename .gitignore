@@ -6,6 +6,9 @@ node_modules
 
 /lib
 /test
+/stories
+/storybook-static
+
 /index.js
 /index.js.map
 /index.d.ts
@@ -19,5 +22,8 @@ node_modules
 /demo/index.d.ts
 /demo/index.d.ts.map
 
+custom-elements.json
+
 gh-pages/
-storybook-static
+
+*storybook.log

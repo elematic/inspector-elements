@@ -22,10 +22,10 @@ export class ObjectName extends LitElement{
   `;
 
   @property({reflect: true})
-  accessor name: string | undefined;
+  name: string | undefined;
 
   @property({type: Boolean, reflect: true})
-  accessor dimmed = false;
+  dimmed = false;
 
   render() {
     return this.name;

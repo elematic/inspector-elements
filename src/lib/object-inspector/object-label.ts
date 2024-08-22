@@ -11,16 +11,16 @@ import '../object/object-value.js';
 @customElement('ix-object-label')
 export class ObjectLabel extends LitElement {
   @property({attribute: false})
-  accessor data: object | undefined;
+  data: unknown;
 
   @property()
-  accessor name: string | undefined;
+  name: string | undefined;
 
   /**
    * Non enumerable object property will be dimmed
    */
   @property({type: Boolean})
-  accessor isNonenumerable = false;
+  isNonenumerable = false;
 
   render() {
     return html`<span

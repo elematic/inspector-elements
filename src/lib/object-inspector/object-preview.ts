@@ -20,11 +20,11 @@ export class ObjectPreview extends LitElement {
     }
     .preview {
       color: var(--ix-object-preview-preview-color);
-    }    
+    }
   `;
 
   @property({attribute: false})
-  accessor data: object | undefined;
+  data: unknown;
 
   render() {
     const object = this.data;

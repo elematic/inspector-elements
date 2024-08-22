@@ -6,10 +6,10 @@ import './object-preview.js';
 @customElement('ix-object-root-label')
 export class ObjectRootLabel extends LitElement {
   @property()
-  accessor name: string | undefined;
+  name: string | undefined;
 
   @property({attribute: false})
-  accessor data: object | undefined;
+  data: unknown;
 
   render() {
     if (typeof this.name === 'string') {

@@ -24,7 +24,7 @@ export const getExpandedPaths = (
   data: Record<PropertyKey, unknown>,
   dataIterator: DataIterator,
   expandPaths: Array<string>,
-  expandLevel: number = 0,
+  expandLevel = 0,
   prevExpandedPaths: Set<string> | undefined
 ) => {
   const wildcardPaths = [...wildcardPathsFromLevel(expandLevel)]

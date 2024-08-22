@@ -35,25 +35,25 @@ export class TreeView extends LitElement {
   ];
 
   @property({attribute: false})
-  accessor name: string | undefined;
+  name: string | undefined;
 
   @property({attribute: false})
-  accessor data: any;
+  data: any;
 
   @property({attribute: false})
-  accessor dataIterator: DataIterator | undefined;
+  dataIterator: DataIterator | undefined;
 
   @property({attribute: false})
-  accessor nodeRenderer: (({name}: any) => unknown) | undefined;
+  nodeRenderer: (({name}: any) => unknown) | undefined;
 
   @property({attribute: false})
-  accessor expandPaths: string | Array<string> | undefined;
+  expandPaths: string | Array<string> | undefined;
 
   @property({attribute: false})
-  accessor expandLevel: number | undefined;
+  expandLevel: number | undefined;
 
   @state()
-  accessor expandedPaths: Set<string> | undefined;
+  expandedPaths: Set<string> | undefined;
 
   render() {
     return this.#renderNode(this.name ?? '', this.data, 0);

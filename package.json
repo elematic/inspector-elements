@@ -48,28 +48,39 @@
   ],
   "scripts": {
     "build": "wireit",
-    "build-storybook": "build-storybook",
+    "build-storybook": "wireit",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write src/**/*.ts",
     "prerelease": "npm run lint && npm run test",
     "release": "npm publish . --access public",
     "test": "wireit",
-    "serve": "wireit"
+    "storybook": "wireit",
+    "gen-manifest": "wireit"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "^1.7.0",
+    "@lit-labs/cli": "^0.6.5",
+    "@lit-labs/gen-manifest": "^0.3.4",
+    "@storybook/addon-essentials": "^8.2.9",
+    "@storybook/addon-links": "^8.2.9",
+    "@storybook/blocks": "^8.2.9",
+    "@storybook/test": "^8.2.9",
+    "@storybook/web-components": "^8.2.9",
+    "@storybook/web-components-vite": "^8.2.9",
     "@types/chai": "^4.3.17",
     "@types/mocha": "^10.0.7",
     "@typescript-eslint/eslint-plugin": "^5.30.4",
     "@typescript-eslint/parser": "^5.30.4",
-    "@web/dev-server": "^0.4.6",
     "@web/test-runner": "^0.18.3",
     "@web/test-runner-puppeteer": "^0.16.0",
     "chai": "^5.1.1",
     "eslint": "^8.19.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-storybook": "^0.8.0",
     "is-dom": "^1.1.0",
     "prettier": "^2.1.1",
+    "storybook": "^8.2.9",
     "typescript": "^5.5.4",
     "wireit": "^0.14.7"
   },
@@ -85,7 +96,11 @@
       ],
       "output": [
         ".tsbuildinfo",
-        "index.{js|js.map}"
+        "index.{js|js.map}",
+        "lib",
+        "demo",
+        "test",
+        "stories"
       ],
       "clean": "if-file-deleted"
     },
@@ -97,16 +112,43 @@
       "files": [],
       "output": []
     },
-    "serve": {
-      "command": "wds --node-resolve",
+    "storybook": {
+      "command": "storybook dev -p 6006",
       "service": true,
       "dependencies": [
         {
           "script": "build",
           "cascade": false
+        },
+        {
+          "script": "gen-manifest",
+          "cascade": false
         }
       ],
-      "files": []
+      "files": [
+        ".storybook/**/*"
+      ]
+    },
+    "gen-manifest": {
+      "command": "lit labs gen --manifest --out .",
+      "files": [
+        "src/**/*.ts",
+        "tsconfig.json"
+      ],
+      "output": [
+        "custom-elements.json"
+      ]
+    },
+    "build-storybook": {
+      "command": "storybook build",
+      "dependencies": [
+        "build",
+        "gen-manifest"
+      ],
+      "files": [
+        ".storybook/**/*"
+      ],
+      "output": []
     }
   }
 }

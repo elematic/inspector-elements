@@ -63,28 +63,28 @@ export class TreeNode extends LitElement {
   #slotController = new SlotController(this);
 
   @property({type: Boolean, reflect: true})
-  accessor expanded = false;
+  expanded = false;
 
   @property({attribute: false})
-  accessor nodeRenderer: NodeRenderer | undefined;
+  nodeRenderer: NodeRenderer | undefined;
 
   @property({type: Boolean})
-  accessor shouldShowArrow = false;
+  shouldShowArrow = false;
 
   @property({type: Boolean})
-  accessor shouldShowPlaceholder = false;
+  shouldShowPlaceholder = false;
 
   @property()
-  accessor name: string | undefined;
+  name: string | undefined;
 
   @property({type: Object})
-  accessor data: unknown;
+  data: unknown;
 
   @property({type: Number})
-  accessor depth = 0;
+  depth = 0;
 
   @property({type: Boolean})
-  accessor isNonenumerable = false;
+  isNonenumerable = false;
 
   render() {
     const nodeRenderer =
