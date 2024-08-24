@@ -100,14 +100,16 @@ const defaultNodeRenderer: NodeRenderer = ({
 }) =>
   depth === 0
     ? html`<ix-object-root-label
-        .name=${name}
-        .data=${data}
-      ></ix-object-root-label>`
+          .name=${name}
+          .data=${data}
+        ></ix-object-root-label
+        ><slot role="group"></slot>`
     : html`<ix-object-label
-        .name=${name}
-        .data=${data}
-        .isNonenumerable=${isNonenumerable ?? false}
-      ></ix-object-label>`;
+          .name=${name}
+          .data=${data}
+          .isNonenumerable=${isNonenumerable ?? false}
+        ></ix-object-label
+        ><slot role="group"></slot>`;
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -29,9 +29,6 @@ export class TreeView extends LitElement {
         margin: 0;
         padding: 0;
       }
-      ix-tree-node > ix-tree-node {
-        padding-left: 12px;
-      }
     `,
   ];
 

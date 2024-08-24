@@ -2,10 +2,16 @@ import {LitElement, css, html} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {baseStyles} from '../styles/base-styles.js';
 import {SlotController} from '../utils/slot-controller.js';
+import {classMap} from 'lit/directives/class-map.js';
 
+/**
+ * A NodeRenderer *must* render a slot element with role="group" to allow for
+ * slot-based children to be distributed to the tree node.
+ */
 export type NodeRenderer = (opts: {
   depth?: number;
   name?: string;
+  expanded: boolean;
   data?: unknown;
   isNonenumerable?: boolean;
 }) => unknown;
@@ -16,7 +22,8 @@ export class TreeNode extends LitElement {
     baseStyles,
     css`
       :host {
-        display: block;
+        display: flex;
+        flex-direction: row;
         box-sizing: border-box;
         cursor: default;
         color: var(--ix-base-color);
@@ -26,21 +33,26 @@ export class TreeNode extends LitElement {
         font-size: var(--ix-treenode-font-size);
       }
 
-      #arrow {
-        display: inline-block;
+      #gutter {
         color: var(--ix-arrow-color);
         font-size: var(--ix-arrow-font-size);
         margin-right: var(--ix-arrow-margin-right);
-        transition: transform var(--ix-arrow-animation-duration) ease 0s;
         user-select: none;
         transform: rotateZ(0deg);
+        width: 1em;
+
+        &.hidden:not(.placeholder) {
+          width: 0;
+        }
+
+        &.hidden > #arrow {
+          display: none;
+        }
       }
 
-      #placeholder {
-        white-space: pre;
-        font-size: var(--ix-arrow-font-size);
-        margin-right: var(--ix-arrow-margin-right);
-        user-select: none;
+      #arrow {
+        display: inline-block;
+        transition: transform var(--ix-arrow-animation-duration) ease 0s;
       }
 
       slot {
@@ -86,28 +98,49 @@ export class TreeNode extends LitElement {
   @property({type: Boolean})
   isNonenumerable = false;
 
+  constructor() {
+    super();
+    this.addEventListener('click', this.#onClick);
+  }
+
   render() {
     const nodeRenderer =
-      this.nodeRenderer ?? (({name}: any) => html`<span>${name}</span>`);
+      this.nodeRenderer ??
+      (({name}: {name?: string}) =>
+        html`<span>${name}</span><slot role="group"></slot>`);
+    const showArrow =
+      this.shouldShowArrow || this.#slotController.hasAssignedElements();
+
     return html`
-      <div @click=${this.#onClick}>
-        ${this.shouldShowArrow || this.#slotController.hasAssignedElements()
-          ? html`<span id="arrow">▶</span>`
-          : this.shouldShowPlaceholder
-          ? html`<span id="placeholder">&nbsp;</span>`
-          : null}
+      <div
+        id="gutter"
+        class=${classMap({
+          hidden: !showArrow,
+          placeholder: this.shouldShowPlaceholder,
+        })}
+      >
+        <span id="arrow">▶</span>
+      </div>
+      <div id="container">
         ${nodeRenderer({
           name: this.name,
           data: this.data,
+          expanded: this.expanded,
           depth: this.depth,
           isNonenumerable: this.isNonenumerable,
         })}
       </div>
-      <slot role="group"></slot>
     `;
   }
 
-  #onClick() {
+  #onClick(e: Event) {
+    // Ignore clicks from within the slot, which are from children of this
+    // tree node.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const slot = this.shadowRoot!.querySelector('slot');
+    if (slot !== null && e.composedPath().includes(slot)) {
+      return;
+    }
     this.dispatchEvent(new ToggleExpandedEvent());
   }
 }
@@ -117,8 +150,6 @@ export class ToggleExpandedEvent extends Event {
 
   constructor() {
     super(ToggleExpandedEvent.eventName, {
-      // bubbles: true,
-      // composed: true,
       cancelable: true,
     });
   }
