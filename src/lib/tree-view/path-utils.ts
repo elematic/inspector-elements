@@ -21,7 +21,7 @@ export const wildcardPathsFromLevel = (level: number) => {
 };
 
 export const getExpandedPaths = (
-  data: Record<PropertyKey, unknown>,
+  data: unknown,
   dataIterator: DataIterator,
   expandPaths: Array<string>,
   expandLevel = 0,
@@ -35,7 +35,7 @@ export const getExpandedPaths = (
   wildcardPaths.forEach((wildcardPath) => {
     const keyPaths = wildcardPath.split('.');
     const populatePaths = (
-      curData: Record<PropertyKey, unknown>,
+      curData: unknown,
       curPath: string,
       depth: number
     ) => {
@@ -58,8 +58,8 @@ export const getExpandedPaths = (
               populatePaths(data, `${curPath}.${name}`, depth + 1);
             }
           }
-        } else {
-          const value = curData[key];
+        } else if (curData != null) {
+          const value = (curData as Record<string, unknown>)[key];
           if (hasChildNodes(value, dataIterator)) {
             populatePaths(value, `${curPath}.${key}`, depth + 1);
           }

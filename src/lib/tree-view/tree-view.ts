@@ -14,6 +14,7 @@ import {
   type DataIterator,
 } from './path-utils.js';
 import './tree-node.js';
+import type {NodeRenderer} from './tree-node.js';
 
 export type {NodeRenderer} from './tree-node.js';
 
@@ -38,13 +39,13 @@ export class TreeView extends LitElement {
   name: string | undefined;
 
   @property({attribute: false})
-  data: any;
+  data: unknown;
 
   @property({attribute: false})
   dataIterator: DataIterator | undefined;
 
   @property({attribute: false})
-  nodeRenderer: (({name}: any) => unknown) | undefined;
+  nodeRenderer: NodeRenderer | undefined;
 
   @property({attribute: false})
   expandPaths: string | Array<string> | undefined;
@@ -61,10 +62,11 @@ export class TreeView extends LitElement {
 
   protected willUpdate(changedProperties: PropertyValues): void {
     if (
-      changedProperties.has('data') ||
-      changedProperties.has('dataIterator') ||
-      changedProperties.has('expandPaths') ||
-      changedProperties.has('expandLevel')
+      (changedProperties.has('data') ||
+        changedProperties.has('dataIterator') ||
+        changedProperties.has('expandPaths') ||
+        changedProperties.has('expandLevel')) &&
+      this.dataIterator !== undefined
     ) {
       const expandPaths = Array.isArray(this.expandPaths)
         ? this.expandPaths
@@ -74,7 +76,7 @@ export class TreeView extends LitElement {
       this.expandedPaths = new Set(
         getExpandedPaths(
           this.data,
-          this.dataIterator!,
+          this.dataIterator,
           expandPaths,
           this.expandLevel,
           this.expandedPaths
