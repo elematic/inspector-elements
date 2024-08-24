@@ -30,7 +30,7 @@ export const baseStyles = css`
     --ix-arrow-color: #6e6e6e;
     --ix-arrow-margin-right: 3;
     --ix-arrow-font-size: 12;
-    --ix-arrow-animation-duration: 0;
+    --ix-arrow-animation-duration: 0.1s;
 
     --ix-treenode-font-family: Menlo, monospace;
     --ix-treenode-font-size: 11px;
