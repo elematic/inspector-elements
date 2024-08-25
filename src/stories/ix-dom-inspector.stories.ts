@@ -1,14 +1,13 @@
 import type {Meta, StoryObj} from '@storybook/web-components';
-import {} from '@storybook/web-components';
-import '../lib/dom-inspector/dom-inspector.js';
 import {html} from 'lit';
-import type {NodeData} from '../lib/dom-inspector/dom-node-preview.js';
+import '../lib/dom-inspector/dom-inspector.js';
+import type {DomNodeData} from '../lib/dom-inspector/dom-node-preview.js';
 
 interface ObjectInspectorProps {
   expandLevel: number;
   expandPaths: string | Array<string> | undefined;
   name: string | undefined;
-  data: NodeData;
+  data: DomNodeData;
   showNonenumerable: boolean;
   sortObjectKeys: boolean | ((a: PropertyKey, b: PropertyKey) => number);
 }
@@ -20,7 +19,7 @@ export default {
   render: ({name, data, expandLevel, expandPaths}) =>
     html`<ix-dom-inspector
       .name=${name}
-      .data=${data}
+      .data=${data as DomNodeData}
       .expandLevel=${expandLevel}
       .expandPaths=${expandPaths}
     ></ix-dom-inspector>`,
@@ -36,21 +35,27 @@ export default {
 
 type Story = StoryObj<ObjectInspectorProps>;
 
-export const MixedObject: Story = {
+export const MixedNodes: Story = {
   args: {
-    name: 'Mixed Object',
+    name: 'Mixed Nodes',
     data: {
       nodeName: 'div',
       nodeType: 1,
       tagName: 'div',
-      attributes: [],
+      attributes: [{name: 'class', value: 'foo'}],
       childNodes: [
         {
           nodeName: 'span',
           nodeType: 1,
           tagName: 'span',
           attributes: [],
-          childNodes: [],
+          childNodes: [
+            {
+              nodeName: '#text',
+              nodeType: 3,
+              textContent: 'Hello, World!',
+            },
+          ],
         },
       ],
     },

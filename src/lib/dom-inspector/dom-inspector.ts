@@ -1,18 +1,19 @@
 import {LitElement, css, html} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
-import {type NodeData} from './dom-node-preview.js';
-import '../tree-view/tree-view.js';
-import {shouldInline} from './should-inline.js';
 import {baseStyles} from '../styles/base-styles.js';
 import type {DataIterator} from '../tree-view/path-utils.js';
+import '../tree-view/tree-view.js';
 import type {NodeRenderer} from '../tree-view/tree-view.js';
+import {type DomNodeData} from './dom-node-preview.js';
+import {shouldInlineContent} from './should-inline.js';
 
 const domIterator: DataIterator = function* (data?: unknown) {
-  const nodeData = data as NodeData;
-  if (nodeData?.childNodes !== undefined) {
-    const textInlined = shouldInline(nodeData);
-
-    if (textInlined) {
+  const nodeData = data as DomNodeData;
+  if (
+    nodeData.nodeType === Node.ELEMENT_NODE &&
+    nodeData.childNodes !== undefined
+  ) {
+    if (shouldInlineContent(nodeData)) {
       return;
     }
 
@@ -27,26 +28,15 @@ const domIterator: DataIterator = function* (data?: unknown) {
       }
 
       yield {
-        name: `${node.tagName}[${i}]`,
+        name: `${node.nodeName}[${i}]`,
         data: node,
-      };
-    }
-
-    // at least 1 child node
-    if (nodeData.tagName) {
-      yield {
-        name: 'CLOSE_TAG',
-        data: {
-          tagName: nodeData.tagName,
-        },
-        isCloseTag: true,
       };
     }
   }
 };
 
 const nodeRenderer: NodeRenderer = ({data, expanded}) =>
-  html`<ix-dom-node-preview .data=${data as NodeData} .expanded=${expanded}
+  html`<ix-dom-node-preview .data=${data as DomNodeData} .expanded=${expanded}
     ><slot role="group"></slot
   ></ix-dom-node-preview>`;
 
@@ -62,7 +52,7 @@ export class DOMInspector extends LitElement {
   ];
 
   @property({attribute: false})
-  data: NodeData | undefined;
+  data: DomNodeData | undefined;
 
   render() {
     return html`<ix-tree-view
