@@ -13,6 +13,10 @@ export type DomNodeData =
   | DocumentData
   | DocumentFragmentData;
 
+export interface ParentData {
+  childNodes?: DomNodeData[];
+}
+
 export type ElementData = {
   tagName: string;
   nodeType: 1;

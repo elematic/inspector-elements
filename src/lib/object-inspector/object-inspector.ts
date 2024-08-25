@@ -1,115 +1,82 @@
 import {LitElement, css, html} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import '../tree-view/tree-view.js';
-import {type NodeRenderer} from '../tree-view/tree-view.js';
-import {propertyIsEnumerable} from '../utils/object-prototype.js';
-import {getPropertyValue} from '../utils/property-utils.js';
 import './object-label.js';
 import './object-root-label.js';
+import type {TreeAdapter} from '../tree-view/tree-adapter.js';
 
 export type Comparator = (a: PropertyKey, b: PropertyKey) => number;
 
-const createIterator = (
-  showNonenumerable: boolean,
-  sortObjectKeys: Comparator | boolean
-) => {
-  const objectIterator = function* <T extends Iterable<unknown>>(data: T) {
-    const shouldIterate =
-      (typeof data === 'object' && data !== null) || typeof data === 'function';
-    if (!shouldIterate) return;
-
-    const dataIsArray = Array.isArray(data);
-
-    // iterable objects (except arrays)
-    if (!dataIsArray && data[Symbol.iterator]) {
-      let i = 0;
-      for (const entry of data) {
-        if (Array.isArray(entry) && entry.length === 2) {
-          const [k, v] = entry;
-          yield {
-            name: k,
-            data: v,
-          };
-        } else {
-          yield {
-            name: i.toString(),
-            data: entry,
-          };
-        }
-        i++;
+const objectTreeAdapter: TreeAdapter<unknown> = {
+  hasChildren(data: unknown): boolean {
+    if (
+      (typeof data === 'object' && data !== null) ||
+      typeof data === 'function'
+    ) {
+      if (Array.isArray(data)) {
+        return data.length > 0;
       }
-    } else {
-      const keys = Object.getOwnPropertyNames(data) as Array<keyof T>;
-      if (sortObjectKeys === true && !dataIsArray) {
-        // Array keys should not be sorted in alphabetical order
-        keys.sort();
-      } else if (typeof sortObjectKeys === 'function') {
-        keys.sort(sortObjectKeys);
+      if (
+        typeof (data as unknown as Iterable<unknown>)[Symbol.iterator] ===
+        'function'
+      ) {
+        return true;
       }
-
-      for (const propertyName of keys) {
-        if (propertyIsEnumerable.call(data, propertyName)) {
-          const propertyValue = getPropertyValue(data, propertyName);
-          yield {
-            name: propertyName || `""`,
-            data: propertyValue,
-          };
-        } else if (showNonenumerable) {
-          // To work around the error (happens some time when propertyName ===
-          // 'caller' || propertyName === 'arguments') 'caller' and 'arguments'
-          // are restricted function properties and cannot be accessed in this
-          // context
-          // http://stackoverflow.com/questions/31921189/caller-and-arguments-are-restricted-function-properties-and-cannot-be-access
-          let propertyValue;
-          try {
-            propertyValue = getPropertyValue(data, propertyName);
-          } catch (e) {
-            // console.warn(e)
-          }
-
-          if (propertyValue !== undefined) {
-            yield {
-              name: propertyName,
-              data: propertyValue,
-              isNonenumerable: true,
-            };
-          }
-        }
-      }
-
-      // [[Prototype]] of the object: `Object.getPrototypeOf(data)`
-      // the property name is shown as "__proto__"
-      if (showNonenumerable && data !== Object.prototype /* already added */) {
-        yield {
-          name: '__proto__',
-          data: Object.getPrototypeOf(data),
-          isNonenumerable: true,
-        };
-      }
+      const keys = Object.getOwnPropertyNames(data) as Array<keyof typeof data>;
+      return keys.length > 0;
     }
-  };
+    return false;
+  },
 
-  return objectIterator;
+  children(data: unknown) {
+    if (!this.hasChildren(data)) {
+      return;
+    }
+    if (
+      Array.isArray(data) ||
+      typeof (data as unknown as Iterable<unknown>)[Symbol.iterator] ===
+        'function'
+    ) {
+      return (
+        Array.isArray(data) ? data : Array.from(data as Iterable<unknown>)
+      ).map((value, i) => ({
+        name: i.toString(),
+        data: value,
+      }));
+    }
+    const keys = Object.getOwnPropertyNames(data) as Array<keyof typeof data>;
+    return keys.map((key) => ({
+      name: key,
+      data: (data as Record<PropertyKey, unknown>)[key],
+    }));
+  },
+
+  render({
+    data,
+    name,
+    depth,
+    isNonenumerable,
+  }: {
+    data: unknown;
+    name: string | undefined;
+    depth: number;
+    expanded: boolean;
+    isNonenumerable?: boolean;
+  }) {
+    return depth === 0
+      ? html`<ix-object-root-label
+            .name=${name}
+            .data=${data}
+          ></ix-object-root-label
+          ><slot role="group"></slot>`
+      : html`<ix-object-label
+            .name=${name}
+            .data=${data}
+            .isNonenumerable=${isNonenumerable ?? false}
+          ></ix-object-label
+          ><slot role="group"></slot>`;
+  },
 };
-
-const defaultNodeRenderer: NodeRenderer = ({
-  depth,
-  name,
-  data,
-  isNonenumerable,
-}) =>
-  depth === 0
-    ? html`<ix-object-root-label
-          .name=${name}
-          .data=${data}
-        ></ix-object-root-label
-        ><slot role="group"></slot>`
-    : html`<ix-object-label
-          .name=${name}
-          .data=${data}
-          .isNonenumerable=${isNonenumerable ?? false}
-        ></ix-object-label
-        ><slot role="group"></slot>`;
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -219,24 +186,11 @@ export class ObjectInspector extends LitElement {
   sortObjectKeys: boolean | ((a: PropertyKey, b: PropertyKey) => number) =
     false;
 
-  /**
-   * Provide a custom nodeRenderer
-   */
-  @property()
-  nodeRenderer: NodeRenderer | undefined;
-
   render() {
-    const dataIterator = createIterator(
-      this.showNonenumerable,
-      this.sortObjectKeys
-    );
-    const renderer = this.nodeRenderer ?? defaultNodeRenderer;
-
     return html`<ix-tree-view
       .name=${this.name}
       .data=${this.data}
-      .nodeRenderer=${renderer}
-      .dataIterator=${dataIterator}
+      .treeAdapter=${objectTreeAdapter}
       .expandPaths=${this.expandPaths}
       .expandLevel=${this.expandLevel}
     ></ix-tree-view>`;

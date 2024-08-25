@@ -1,17 +1,15 @@
+import type {TreeAdapter} from './tree-adapter.js';
+
 export const DEFAULT_ROOT_PATH = '$';
 
 const WILDCARD = '*';
 
-export type DataIterator = (
-  o: unknown
-) => IterableIterator<{name: string; data: unknown}>;
-
-export function hasChildNodes(
-  data: unknown,
-  dataIterator: DataIterator
-): data is Record<PropertyKey, unknown> {
-  return !dataIterator(data).next().done;
-}
+// export function hasChildNodes(
+//   data: unknown,
+//   dataIterator: DataIterator
+// ): data is Record<PropertyKey, unknown> {
+//   return !dataIterator(data).next().done;
+// }
 
 export const wildcardPathsFromLevel = (level: number) => {
   // i is depth
@@ -22,7 +20,7 @@ export const wildcardPathsFromLevel = (level: number) => {
 
 export const getExpandedPaths = (
   data: unknown,
-  dataIterator: DataIterator,
+  treeAdapter: TreeAdapter<unknown>,
   expandPaths: Array<string>,
   expandLevel = 0,
   prevExpandedPaths: Set<string> | undefined
@@ -44,23 +42,21 @@ export const getExpandedPaths = (
         return;
       }
       const key = keyPaths[depth];
+      const hasChildren = treeAdapter.hasChildren(curData);
       if (depth === 0) {
-        if (
-          hasChildNodes(curData, dataIterator) &&
-          (key === DEFAULT_ROOT_PATH || key === WILDCARD)
-        ) {
+        if (hasChildren && (key === DEFAULT_ROOT_PATH || key === WILDCARD)) {
           populatePaths(curData, DEFAULT_ROOT_PATH, depth + 1);
         }
       } else {
         if (key === WILDCARD) {
-          for (const {name, data} of dataIterator(curData)) {
-            if (hasChildNodes(data, dataIterator)) {
+          for (const {data, name} of treeAdapter.children(curData) ?? []) {
+            if (hasChildren) {
               populatePaths(data, `${curPath}.${name}`, depth + 1);
             }
           }
         } else if (curData != null) {
           const value = (curData as Record<string, unknown>)[key];
-          if (hasChildNodes(value, dataIterator)) {
+          if (hasChildren) {
             populatePaths(value, `${curPath}.${key}`, depth + 1);
           }
         }

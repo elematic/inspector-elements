@@ -3,18 +3,7 @@ import {customElement, property} from 'lit/decorators.js';
 import {baseStyles} from '../styles/base-styles.js';
 import {SlotController} from '../utils/slot-controller.js';
 import {classMap} from 'lit/directives/class-map.js';
-
-/**
- * A NodeRenderer *must* render a slot element with role="group" to allow for
- * slot-based children to be distributed to the tree node.
- */
-export type NodeRenderer = (opts: {
-  depth?: number;
-  name?: string;
-  expanded: boolean;
-  data?: unknown;
-  isNonenumerable?: boolean;
-}) => unknown;
+import type {TreeAdapter} from './tree-adapter.js';
 
 @customElement('ix-tree-node')
 export class TreeNode extends LitElement {
@@ -77,8 +66,11 @@ export class TreeNode extends LitElement {
   @property({type: Boolean, reflect: true})
   expanded = false;
 
+  // @property({attribute: false})
+  // nodeRenderer: NodeRenderer | undefined;
+
   @property({attribute: false})
-  nodeRenderer: NodeRenderer | undefined;
+  treeAdapter: TreeAdapter<unknown> | undefined;
 
   @property({type: Boolean})
   shouldShowArrow = false;
@@ -105,7 +97,7 @@ export class TreeNode extends LitElement {
 
   render() {
     const nodeRenderer =
-      this.nodeRenderer ??
+      this.treeAdapter?.render ??
       (({name}: {name?: string}) =>
         html`<span>${name}</span><slot role="group"></slot>`);
     const showArrow =
@@ -123,8 +115,8 @@ export class TreeNode extends LitElement {
       </div>
       <div id="container">
         ${nodeRenderer({
-          name: this.name,
           data: this.data,
+          name: this.name,
           expanded: this.expanded,
           depth: this.depth,
           isNonenumerable: this.isNonenumerable,

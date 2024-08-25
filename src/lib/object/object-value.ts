@@ -65,7 +65,7 @@ export class ObjectValue extends LitElement {
           return html`<span class="null">null</span>`;
         }
         if (object instanceof Date) {
-          return html`<span>{object.toString()}</span>`;
+          return html`<span>${object.toString()}</span>`;
         }
         if (object instanceof RegExp) {
           return html`<span class="RegExp"> ${object.toString()} </span>`;
