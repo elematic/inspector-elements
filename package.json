@@ -2,24 +2,16 @@
   "name": "inspector-elements",
   "version": "0.0.1",
   "type": "module",
-  "description": "Power of Browser DevTools inspectors right inside your React app",
+  "main": "index.js",
+  "description": "Web components for visually inspecting objects",
   "keywords": [
-    "devtools",
+    "web component",
+    "custom element",
     "inspector",
-    "object",
-    "object-inspector",
-    "react",
-    "react-component",
-    "reactjs",
-    "table",
-    "table-inspector",
-    "table-view",
-    "tableview",
-    "tree",
-    "tree-view",
-    "treeview",
-    "ui",
-    "view"
+    "devtools",
+    "object inspector",
+    "table inspector",
+    "object tree"
   ],
   "homepage": "https://github.com/elematic/inspector-elements",
   "bugs": {
@@ -31,7 +23,6 @@
   },
   "license": "MIT",
   "author": "Justin Fagnani <justin@elematic.dev> (http://github.com/justinfagnani)",
-  "main": "index.js",
   "exports": {
     ".": {
       "types": "./index.d.ts",
@@ -78,7 +69,6 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-storybook": "^0.8.0",
-    "is-dom": "^1.1.0",
     "prettier": "^2.1.1",
     "storybook": "^8.2.9",
     "typescript": "^5.5.4",
