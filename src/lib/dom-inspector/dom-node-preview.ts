@@ -93,7 +93,6 @@ export class DomNodePreview extends LitElement {
   expanded = false;
 
   render() {
-    console.log('render', this.expanded);
     const {data} = this;
 
     if (data === undefined) {

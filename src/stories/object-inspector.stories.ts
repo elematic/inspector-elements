@@ -34,6 +34,13 @@ export default {
 
 type Story = StoryObj<ObjectInspectorProps>;
 
+const map = new Map([['key', 'value']]);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(map as any).foo = 'bar';
+const set = new Set(['foo', 'bar']);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(set as any).foo = 'bar';
+
 export const MixedObject: Story = {
   args: {
     name: 'Mixed Object',
@@ -44,8 +51,8 @@ export const MixedObject: Story = {
       object: {foo: 'bar'},
       date: new Date(),
       regexp: /foo/,
-      map: new Map([['key', 'value']]),
-      set: new Set(['foo', 'bar']),
+      map: Object.freeze(map),
+      set: Object.freeze(set),
     },
     expandLevel: 1,
     expandPaths: '$.object',
@@ -81,5 +88,24 @@ export const ArrayData: Story = {
       'nine',
       'ten',
     ],
+  },
+};
+
+export const MapData: Story = {
+  args: {
+    name: 'MapData',
+    data: Object.freeze(new Map([['key', 'value']])),
+  },
+};
+
+export const NoRootName: Story = {
+  args: {
+    name: undefined,
+    data: {
+      string: 'foo',
+      number: 42,
+      array: [7, 8, 9],
+      object: {foo: 'bar'},
+    },
   },
 };

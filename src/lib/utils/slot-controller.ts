@@ -10,7 +10,7 @@ export class SlotController implements ReactiveController {
 
   constructor(
     host: ReactiveControllerHost & Element,
-    slotNames?: ReadonlyArray<string>,
+    slotNames?: ReadonlyArray<string>
   ) {
     (this._host = host).addController(this);
     this._slotNames = slotNames;
@@ -51,7 +51,7 @@ export class SlotController implements ReactiveController {
   hostDisconnected() {
     this._host.shadowRoot!.removeEventListener(
       'slotchange',
-      this._onSlotChange,
+      this._onSlotChange
     );
   }
 

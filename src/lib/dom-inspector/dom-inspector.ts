@@ -30,7 +30,7 @@ const domTreeAdapter: TreeAdapter<DomNodeData> = {
     name: string | undefined;
     depth: number;
     expanded: boolean;
-    isNonenumerable?: boolean;
+    isNonEnumerable?: boolean;
   }) {
     return html`<ix-dom-node-preview .data=${data} .expanded=${expanded}
       ><slot role="group"></slot

@@ -1,9 +1,11 @@
 import {LitElement, css, html} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import '../tree-view/tree-view.js';
-import './object-label.js';
-import './object-root-label.js';
-import type {TreeAdapter} from '../tree-view/tree-adapter.js';
+import '../object/object-name.js';
+import '../object/object-value.js';
+import './object-preview.js';
+import type {TreeAdapter, TreeItem} from '../tree-view/tree-adapter.js';
+import {MapEntries, SetEntries} from '../object/object-value.js';
 
 export type Comparator = (a: PropertyKey, b: PropertyKey) => number;
 
@@ -32,49 +34,103 @@ const objectTreeAdapter: TreeAdapter<unknown> = {
     if (!this.hasChildren(data)) {
       return;
     }
-    if (
-      Array.isArray(data) ||
-      typeof (data as unknown as Iterable<unknown>)[Symbol.iterator] ===
-        'function'
-    ) {
-      return (
-        Array.isArray(data) ? data : Array.from(data as Iterable<unknown>)
-      ).map((value, i) => ({
-        name: i.toString(),
-        data: value,
-      }));
+    const children: Array<TreeItem<unknown>> = [];
+    if (data instanceof Map) {
+      children.push({
+        name: '[[Entries]]',
+        data: new MapEntries(data),
+        synthetic: true,
+        expanded: true,
+      });
+    } else if (data instanceof MapEntries) {
+      children.push(
+        ...Array.from(data.map.entries()).map(([key, value]) => ({
+          name: String(key),
+          data: value,
+        }))
+      );
+      // Early return to not add object keys for MapEntries itself
+      return children;
+    } else if (data instanceof Set) {
+      children.push({
+        name: '[[Entries]]',
+        data: new SetEntries(data),
+        synthetic: true,
+        expanded: true,
+      });
+    } else if (data instanceof SetEntries) {
+      children.push(
+        ...Array.from(data.set.values()).map((value, i) => ({
+          name: String(i),
+          data: value,
+        }))
+      );
+      // Early return to not add object keys for SetEntries itself
+      return children;
+    } else {
+      if (
+        !Array.isArray(data) &&
+        typeof (data as unknown as Iterable<unknown>)[Symbol.iterator] ===
+          'function'
+      ) {
+        children.push(
+          ...(Array.isArray(data)
+            ? data
+            : Array.from(data as Iterable<unknown>).map((value, i) => ({
+                name: i.toString(),
+                data: value,
+              })))
+        );
+      }
     }
-    const keys = Object.getOwnPropertyNames(data) as Array<keyof typeof data>;
-    return keys.map((key) => ({
-      name: key,
-      data: (data as Record<PropertyKey, unknown>)[key],
-    }));
+    const descriptors = Object.getOwnPropertyDescriptors(data);
+    children.push(
+      ...Object.entries(descriptors).map(([key, descriptor]) => ({
+        name: key,
+        data: (data as Record<PropertyKey, unknown>)[key],
+        isNonEnumerable: !descriptor.enumerable,
+      }))
+    );
+    return children;
   },
 
   render({
     data,
     name,
     depth,
-    isNonenumerable,
+    isNonEnumerable,
   }: {
     data: unknown;
     name: string | undefined;
     depth: number;
     expanded: boolean;
-    isNonenumerable?: boolean;
+    isNonEnumerable?: boolean;
   }) {
-    return depth === 0
-      ? html`<ix-object-root-label
+    const renderedName =
+      typeof name === 'string' && name !== ''
+        ? html`<ix-object-name
             .name=${name}
-            .data=${data}
-          ></ix-object-root-label
-          ><slot role="group"></slot>`
-      : html`<ix-object-label
-            .name=${name}
-            .data=${data}
-            .isNonenumerable=${isNonenumerable ?? false}
-          ></ix-object-label
-          ><slot role="group"></slot>`;
+            .dimmed=${isNonEnumerable ?? false}
+          ></ix-object-name>`
+        : depth === 0
+        ? undefined
+        : html`<ix-object-preview .data=${name}></ix-object-preview>`;
+
+    // The root level uses <ix-object-preview> to show a preview of a few
+    // child properties. All other levels use <ix-object-value> to show the
+    // value of the property.
+    const renderedValue =
+      data instanceof MapEntries || data instanceof SetEntries
+        ? undefined
+        : depth === 0
+        ? html`<ix-object-preview .data=${data}></ix-object-preview>`
+        : html`<ix-object-value .data=${data}></ix-object-value>`;
+
+    const separator =
+      renderedName && renderedValue ? html`<span>: </span>` : undefined;
+
+    return html`<span>${renderedName}${separator}${renderedValue}</span>
+      <slot role="group"></slot>`;
   },
 };
 

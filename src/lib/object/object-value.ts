@@ -1,6 +1,20 @@
 import {LitElement, css, html} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 
+export class MapEntries {
+  map: Map<unknown, unknown>;
+  constructor(map: Map<unknown, unknown>) {
+    this.map = map;
+  }
+}
+
+export class SetEntries {
+  set: Set<unknown>;
+  constructor(set: Set<unknown>) {
+    this.set = set;
+  }
+}
+
 /**
  * A short description of the object values.
  * Can be used to render tree node in ObjectInspector
@@ -32,11 +46,11 @@ export class ObjectValue extends LitElement {
     }
     .FunctionPrefix {
       color: var(--ix-object-value-function-prefix-color);
-      font-style: 'italic',
+      font-style: 'italic';
     }
     .FunctionName {
       color: var(--ix-object-value-function-name-color);
-      font-style: 'italic',
+      font-style: 'italic';
     }
     .symbol {
       color: var(--ix-object-value-symbol-color);
@@ -63,6 +77,18 @@ export class ObjectValue extends LitElement {
       case 'object':
         if (object === null) {
           return html`<span class="null">null</span>`;
+        }
+        if (object instanceof Map) {
+          return html`<span>Map(${object.size})</span>`;
+        }
+        if (object instanceof Set) {
+          return html`<span>Set(${object.size})</span>`;
+        }
+        if (object instanceof MapEntries) {
+          return html`<span>(${object.map.size})</span>`;
+        }
+        if (object instanceof SetEntries) {
+          return html`<span>(${object.set.size})</span>`;
         }
         if (object instanceof Date) {
           return html`<span>${object.toString()}</span>`;
@@ -97,6 +123,7 @@ export class ObjectValue extends LitElement {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 interface BufferConstructor extends Function {
   isBuffer: (object: unknown) => boolean;
 }

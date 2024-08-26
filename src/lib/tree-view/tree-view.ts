@@ -10,7 +10,7 @@ import {map} from 'lit/directives/map.js';
 import {baseStyles} from '../styles/base-styles.js';
 import {DEFAULT_ROOT_PATH, getExpandedPaths} from './path-utils.js';
 import './tree-node.js';
-import type {TreeAdapter} from './tree-adapter.js';
+import type {TreeAdapter, TreeItem} from './tree-adapter.js';
 
 @customElement('ix-tree-view')
 export class TreeView extends LitElement {
@@ -45,7 +45,7 @@ export class TreeView extends LitElement {
   expandedPaths: Set<string> | undefined;
 
   render() {
-    return this.#renderNode(this.data, this.name ?? '', 0);
+    return this.#renderNode({data: this.data, name: this.name ?? ''}, 0);
   }
 
   protected willUpdate(changedProperties: PropertyValues): void {
@@ -74,18 +74,18 @@ export class TreeView extends LitElement {
   }
 
   #renderNode(
-    data: unknown,
-    name: string,
+    item: TreeItem<unknown>,
     depth: number,
     parentPath?: string
   ): TemplateResult {
     const path =
-      parentPath === undefined ? DEFAULT_ROOT_PATH : `${parentPath}.${name}`;
-    const expanded = this.expandedPaths?.has(path) ?? false;
+      parentPath === undefined
+        ? DEFAULT_ROOT_PATH
+        : `${parentPath}.${item.name}`;
+    const expanded = this.expandedPaths?.has(path) || item.expanded || false;
 
     return html`<ix-tree-node
-      .name=${name}
-      .data=${data}
+      .item=${item}
       .treeAdapter=${this.treeAdapter}
       .depth=${depth}
       .expanded=${expanded}
@@ -99,8 +99,8 @@ export class TreeView extends LitElement {
         }
         this.expandedPaths = expandedPaths;
       }}
-      >${map(this.treeAdapter?.children(data), (item) =>
-        this.#renderNode(item.data, item.name, depth + 1, path)
+      >${map(this.treeAdapter?.children(item.data), (child) =>
+        this.#renderNode(child, depth + 1, path)
       )}</ix-tree-node
     >`;
   }

@@ -82,7 +82,9 @@ export class ObjectPreview extends LitElement {
               ${ellipsis}
             </span>`
           );
-          if (ellipsis) break;
+          if (ellipsis) {
+            break;
+          }
         }
       }
 

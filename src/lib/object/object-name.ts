@@ -11,7 +11,7 @@ import {customElement, property} from 'lit/decorators.js';
  * the property name will be dimmed to show the difference.
  */
 @customElement('ix-object-name')
-export class ObjectName extends LitElement{
+export class ObjectName extends LitElement {
   static styles = css`
     :host {
       color: var(--ix-object-name-color);
@@ -30,4 +30,4 @@ export class ObjectName extends LitElement{
   render() {
     return this.name;
   }
-};
+}

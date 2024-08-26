@@ -8,6 +8,19 @@
 export interface TreeItem<T> {
   name: string;
   data: T;
+
+  /**
+   * Whether the item is synthetic and not part of the original data. An example
+   * is [[Entries]] on a Map or Set.
+   */
+  synthetic?: boolean;
+
+  /**
+   * Whether the item should be expanded by default.
+   */
+  expanded?: boolean;
+
+  isNonEnumerable?: boolean;
 }
 
 export interface TreeAdapter<T> {
@@ -24,6 +37,6 @@ export interface TreeAdapter<T> {
     name: string | undefined;
     depth: number;
     expanded: boolean;
-    isNonenumerable?: boolean;
+    isNonEnumerable?: boolean;
   }): unknown;
 }

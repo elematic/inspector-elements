@@ -3,7 +3,7 @@ import {customElement, property} from 'lit/decorators.js';
 import {baseStyles} from '../styles/base-styles.js';
 import {SlotController} from '../utils/slot-controller.js';
 import {classMap} from 'lit/directives/class-map.js';
-import type {TreeAdapter} from './tree-adapter.js';
+import type {TreeAdapter, TreeItem} from './tree-adapter.js';
 
 @customElement('ix-tree-node')
 export class TreeNode extends LitElement {
@@ -28,7 +28,7 @@ export class TreeNode extends LitElement {
         margin-right: var(--ix-arrow-margin-right);
         user-select: none;
         transform: rotateZ(0deg);
-        width: 1em;
+        flex: 0 0 1em;
 
         &.hidden:not(.placeholder) {
           width: 0;
@@ -37,6 +37,10 @@ export class TreeNode extends LitElement {
         &.hidden > #arrow {
           display: none;
         }
+      }
+
+      #container {
+        flex: auto;
       }
 
       #arrow {
@@ -66,9 +70,6 @@ export class TreeNode extends LitElement {
   @property({type: Boolean, reflect: true})
   expanded = false;
 
-  // @property({attribute: false})
-  // nodeRenderer: NodeRenderer | undefined;
-
   @property({attribute: false})
   treeAdapter: TreeAdapter<unknown> | undefined;
 
@@ -78,17 +79,14 @@ export class TreeNode extends LitElement {
   @property({type: Boolean})
   shouldShowPlaceholder = false;
 
-  @property()
-  name: string | undefined;
-
-  @property({type: Object})
-  data: unknown;
+  @property({attribute: false})
+  item: TreeItem<unknown> | undefined;
 
   @property({type: Number})
   depth = 0;
 
   @property({type: Boolean})
-  isNonenumerable = false;
+  isNonEnumerable = false;
 
   constructor() {
     super();
@@ -103,6 +101,8 @@ export class TreeNode extends LitElement {
     const showArrow =
       this.shouldShowArrow || this.#slotController.hasAssignedElements();
 
+    console.log('TreeNode render()', this.item?.name, this.item?.expanded);
+
     return html`
       <div
         id="gutter"
@@ -115,11 +115,14 @@ export class TreeNode extends LitElement {
       </div>
       <div id="container">
         ${nodeRenderer({
-          data: this.data,
-          name: this.name,
-          expanded: this.expanded,
+          data: this.item?.data,
+          name: this.item?.name,
+          expanded: this.expanded || (this.item?.expanded ?? false),
           depth: this.depth,
-          isNonenumerable: this.isNonenumerable,
+          isNonEnumerable:
+            this.isNonEnumerable ||
+            this.item?.isNonEnumerable ||
+            this.item?.synthetic,
         })}
       </div>
     `;
