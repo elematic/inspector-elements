@@ -1,15 +1,16 @@
-export function getPropertyValue<T>(object: T, propertyName: keyof T): unknown {
-  const propertyDescriptor = Object.getOwnPropertyDescriptor(
-    object,
-    propertyName
-  );
-  if (propertyDescriptor?.get) {
+export const getOwnPropertyNames = Object.getOwnPropertyNames;
+
+export function safeGetPropertyValue<T>(
+  object: T,
+  propertyName: keyof T
+): unknown {
+  const descriptor = Object.getOwnPropertyDescriptor(object, propertyName);
+  if (descriptor?.get) {
     try {
-      return propertyDescriptor.get();
+      return descriptor.get();
     } catch {
-      return propertyDescriptor.get;
+      return descriptor.get;
     }
   }
-
   return object[propertyName];
 }

@@ -1,4 +1,4 @@
-import type {ElementData} from './dom-node-preview.js';
+import type {ElementData} from './types.js';
 
 /**
  * Returns whether or the element should be rendered with its content inlined.

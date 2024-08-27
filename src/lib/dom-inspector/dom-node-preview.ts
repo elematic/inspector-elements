@@ -1,78 +1,10 @@
-import {LitElement, css, html} from 'lit';
+import {LitElement, css, html, nothing} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
 import {baseStyles} from '../styles/base-styles.js';
+import './dom-close-tag.js';
+import './dom-open-tag.js';
 import {shouldInlineContent} from './should-inline.js';
-
-export type DomNodeData =
-  | ElementData
-  | TextData
-  | CDataData
-  | CommentData
-  | ProcessingInstructionData
-  | DocumentTypeData
-  | DocumentData
-  | DocumentFragmentData;
-
-export interface ParentData {
-  childNodes?: DomNodeData[];
-}
-
-export type ElementData = {
-  tagName: string;
-  nodeType: 1;
-  nodeName: string;
-  attributes?: Array<AttributeData>;
-  childNodes?: Array<DomNodeData>;
-};
-
-export type AttributeData = {
-  name: string;
-  value: string;
-};
-
-export type TextData = {
-  nodeType: 3;
-  nodeName: '#text';
-  textContent: string;
-};
-
-export type CDataData = {
-  nodeType: 4;
-  nodeName: '#cdata-section';
-  textContent: string;
-};
-
-export type CommentData = {
-  nodeType: 8;
-  nodeName: '#comment';
-  textContent: string;
-};
-
-export type ProcessingInstructionData = {
-  nodeType: 7;
-  nodeName: '#processing-instruction';
-  name: string;
-};
-
-export type DocumentData = {
-  nodeType: 9;
-  nodeName: '#document';
-  childNodes: DomNodeData[];
-};
-
-export type DocumentTypeData = {
-  nodeType: 10;
-  nodeName: '#document-type';
-  name: string;
-  publicId?: string;
-  systemId?: string;
-};
-
-export type DocumentFragmentData = {
-  nodeType: 11;
-  nodeName: '#document-fragment';
-  childNodes: DomNodeData[];
-};
+import type {DomNodeData, TextData} from './types.js';
 
 @customElement('ix-dom-node-preview')
 export class DomNodePreview extends LitElement {
@@ -82,6 +14,12 @@ export class DomNodePreview extends LitElement {
       :host {
         display: inline-block;
         white-space: nowrap;
+      }
+      .htmlComment {
+        color: var(--ix-html-comment-color);
+      }
+      .htmlDoctype {
+        color: var(--ix-html-doctype-color);
       }
     `,
   ];
@@ -101,16 +39,21 @@ export class DomNodePreview extends LitElement {
 
     switch (data.nodeType) {
       case Node.ELEMENT_NODE:
-        const content = shouldInlineContent(data)
+        const content = this.expanded
+          ? nothing
+          : shouldInlineContent(data)
           ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             (data.childNodes![0] as TextData).textContent
-          : this.expanded
-          ? html`<slot role="group"></slot>`
           : '…';
         return html`<span
-          >${this.#renderOpenTag(data)}${content}${this.#renderCloseTag(
-            data
-          )}</span
+          >${html`<ix-dom-open-tag
+            .name=${data.tagName}
+            .attributeData=${data.attributes}
+          ></ix-dom-open-tag>`}${content}${this.expanded
+            ? nothing
+            : html`<ix-dom-close-tag
+                .name=${data.tagName}
+              ></ix-dom-close-tag>`}</span
         >`;
       case Node.TEXT_NODE:
         return html`<span>${data.textContent}</span>`;
@@ -137,27 +80,5 @@ export class DomNodePreview extends LitElement {
         data as void;
         return undefined;
     }
-  }
-
-  #renderOpenTag(data: ElementData) {
-    const {tagName, attributes} = data;
-    return html`<span
-      >&lt;<span class="tagName">${tagName}</span>${attributes?.map(
-        (attribute) =>
-          html`<span>
-            <span class="htmlAttributeName">${attribute.name}</span>="<span
-              class="htmlAttributeValue"
-              >${attribute.value}</span
-            >"</span
-          >`
-      )}&gt;</span
-    >`;
-  }
-
-  #renderCloseTag(data: ElementData) {
-    console.log('#renderCloseTag');
-    return html`<span
-      >&lt;/<span class="tagName">${data.tagName}</span>&gt;</span
-    >`;
   }
 }

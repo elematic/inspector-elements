@@ -69,6 +69,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-storybook": "^0.8.0",
+    "is-dom": "^1.1.0",
     "prettier": "^2.1.1",
     "storybook": "^8.2.9",
     "typescript": "^5.5.4",

@@ -3,28 +3,34 @@ import {join} from 'lit-html/directives/join.js';
 import {customElement, property} from 'lit/decorators.js';
 import '../object/object-name.js';
 import '../object/object-value.js';
-import {hasOwnProperty} from '../utils/object-prototype.js';
-import {getPropertyValue} from '../utils/property-utils.js';
+import {
+  getOwnPropertyNames,
+  safeGetPropertyValue,
+} from '../utils/property-utils.js';
 
 /**
- * A preview of the object
+ * A compact (1-line-ish) preview of an object. Includes a small number of
+ * properties and their values.
+ *
+ * The number of properties shown is limited by the `maxProperties` property.
  */
 @customElement('ix-object-preview')
 export class ObjectPreview extends LitElement {
   static styles = css`
     :host {
       color: var(--ix-object-preview-color);
-    }
-    .objectDescription {
-      color: var(--ix-object-preview-object-description-color);
-    }
-    .preview {
-      color: var(--ix-object-preview-preview-color);
+      font-style: var(--ix-object-preview-font-style);
     }
   `;
 
   @property({attribute: false})
   data: unknown;
+
+  @property({type: Number})
+  maxProperties = 5;
+
+  @property({type: Number})
+  maxArrayItems = 10;
 
   render() {
     const object = this.data;
@@ -39,66 +45,47 @@ export class ObjectPreview extends LitElement {
     }
 
     if (Array.isArray(object)) {
-      const maxProperties = 10;
       const previewArray = object
-        .slice(0, maxProperties)
+        .slice(0, this.maxArrayItems)
         .map(
           (element) =>
             html`<ix-object-value .data=${element}></ix-object-value>`
         );
 
       const arrayLength = object.length;
-      if (arrayLength > maxProperties) {
+      if (arrayLength > this.maxArrayItems) {
         previewArray.push(html`<span>…</span>`);
       }
       return html`
-        <span class="objectDescription">
-          ${arrayLength === 0 ? `` : `(${arrayLength})\xa0`}
-        </span>
-        <span class="preview"> [${join(previewArray, ', ')}] </span>
+        <span>${arrayLength === 0 ? `` : `(${arrayLength})\xa0`}</span
+        ><span>[${join(previewArray, ', ')}]</span>
       `;
     } else {
-      const maxProperties = 5; /*styles.objectMaxProperties; */
-      const propertyNodes = [] as Array<unknown>;
-      for (const propertyName in object) {
-        if (hasOwnProperty.call(object, propertyName)) {
-          let ellipsis;
-          if (
-            propertyNodes.length === maxProperties - 1 &&
-            Object.keys(object).length > maxProperties
-          ) {
-            ellipsis = html`<span>…</span>`;
-          }
-
-          const propertyValue = getPropertyValue(
+      const propertyNames = getOwnPropertyNames(object);
+      const propertyNodes = propertyNames
+        .slice(0, this.maxProperties)
+        .map((propertyName) => {
+          const propertyValue = safeGetPropertyValue(
             object,
             propertyName as keyof typeof object
           );
-          propertyNodes.push(
-            html`<span key=${propertyName}>
-              <ix-object-name .name=${propertyName || `""`}></ix-object-name>
-              :&nbsp;
-              <ix-object-value .data=${propertyValue}></ix-object-value>
-              ${ellipsis}
-            </span>`
-          );
-          if (ellipsis) {
-            break;
-          }
-        }
+          return html`<span
+            ><ix-object-name .name=${propertyName || `""`}></ix-object-name
+            >:&nbsp;<ix-object-value .data=${propertyValue}></ix-object-value
+          ></span>`;
+        });
+      if (propertyNames.length > this.maxProperties) {
+        propertyNodes.push(html`<span>…</span>`);
       }
 
-      const objectConstructorName = object.constructor
-        ? object.constructor.name
-        : 'Object';
+      const constructorName =
+        object.constructor === undefined || object.constructor.name === 'Object'
+          ? undefined
+          : `${object.constructor.name} `;
 
       return html`
-        <span class="objectDescription">
-          ${objectConstructorName === 'Object'
-            ? ''
-            : `${objectConstructorName} `}
-        </span>
-        <span class="preview"> { ${join(propertyNodes, ', ')} } </span>
+        <span>${constructorName}</span
+        ><span>{${join(propertyNodes, ', ')}}</span>
       `;
     }
   }

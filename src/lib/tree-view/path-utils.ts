@@ -4,13 +4,6 @@ export const DEFAULT_ROOT_PATH = '$';
 
 const WILDCARD = '*';
 
-// export function hasChildNodes(
-//   data: unknown,
-//   dataIterator: DataIterator
-// ): data is Record<PropertyKey, unknown> {
-//   return !dataIterator(data).next().done;
-// }
-
 export const wildcardPathsFromLevel = (level: number) => {
   // i is depth
   return Array.from({length: level}, (_, i) =>
@@ -23,13 +16,13 @@ export const getExpandedPaths = (
   treeAdapter: TreeAdapter<unknown>,
   expandPaths: Array<string>,
   expandLevel = 0,
-  prevExpandedPaths: Set<string> | undefined
-) => {
+  prevExpandedPaths: Map<string, boolean> | undefined
+): Map<string, boolean> => {
   const wildcardPaths = [...wildcardPathsFromLevel(expandLevel)]
     .concat(expandPaths)
     .filter((path) => typeof path === 'string'); // could be undefined
 
-  const expandedPaths = new Set<string>();
+  const expandedPaths = new Map<string, boolean>();
   wildcardPaths.forEach((wildcardPath) => {
     const keyPaths = wildcardPath.split('.');
     const populatePaths = (
@@ -38,7 +31,7 @@ export const getExpandedPaths = (
       depth: number
     ) => {
       if (depth === keyPaths.length) {
-        expandedPaths.add(curPath);
+        expandedPaths.set(curPath, true);
         return;
       }
       const key = keyPaths[depth];
@@ -67,8 +60,10 @@ export const getExpandedPaths = (
   });
 
   if (prevExpandedPaths !== undefined) {
-    for (const path of prevExpandedPaths) {
-      expandedPaths.add(path);
+    for (const [path, expanded] of prevExpandedPaths) {
+      if (expanded) {
+        expandedPaths.set(path, true);
+      }
     }
   }
 

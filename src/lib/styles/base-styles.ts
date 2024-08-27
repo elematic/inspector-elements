@@ -18,6 +18,7 @@ export const baseStyles = css`
     --ix-object-value-number-color: rgb(28, 0, 207);
     --ix-object-value-boolean-color: rgb(28, 0, 207);
     --ix-object-value-function-prefix-color: rgb(13, 34, 170);
+    --ix-object-preview-font-style: italic;
 
     --ix-html-tag-color: rgb(168, 148, 166);
     --ix-html-tagname-color: rgb(136, 18, 128);

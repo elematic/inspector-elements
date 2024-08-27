@@ -1,7 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/web-components';
 import {html} from 'lit';
 import '../lib/dom-inspector/dom-inspector.js';
-import type {DomNodeData} from '../lib/dom-inspector/dom-node-preview.js';
+import type {DomNodeData} from '../lib/dom-inspector/types.js';
 
 interface ObjectInspectorProps {
   expandLevel: number;

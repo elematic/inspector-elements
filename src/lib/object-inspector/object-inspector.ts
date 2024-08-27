@@ -1,15 +1,37 @@
-import {LitElement, css, html} from 'lit';
+import {
+  LitElement,
+  css,
+  html,
+  type PropertyValues,
+  type TemplateResult,
+} from 'lit';
 import {customElement, property} from 'lit/decorators.js';
-import '../tree-view/tree-view.js';
+import {map} from 'lit/directives/map.js';
 import '../object/object-name.js';
 import '../object/object-value.js';
-import './object-preview.js';
-import type {TreeAdapter, TreeItem} from '../tree-view/tree-adapter.js';
 import {MapEntries, SetEntries} from '../object/object-value.js';
+import {baseStyles} from '../styles/base-styles.js';
+import {DEFAULT_ROOT_PATH, getExpandedPaths} from '../tree-view/path-utils.js';
+import {type TreeAdapter, type TreeItem} from '../tree-view/tree-adapter.js';
+import '../tree-view/tree-node.js';
+import {getOwnPropertyNames} from '../utils/property-utils.js';
+import './object-preview.js';
 
 export type Comparator = (a: PropertyKey, b: PropertyKey) => number;
 
-const objectTreeAdapter: TreeAdapter<unknown> = {
+class ObjectTreeAdapter implements TreeAdapter<unknown> {
+  #host: ObjectInspector;
+
+  expandedPaths = new Map<string, boolean>();
+
+  constructor(host: ObjectInspector) {
+    this.#host = host;
+  }
+
+  requestUpdate() {
+    return this.#host.requestUpdate();
+  }
+
   hasChildren(data: unknown): boolean {
     if (
       (typeof data === 'object' && data !== null) ||
@@ -24,11 +46,11 @@ const objectTreeAdapter: TreeAdapter<unknown> = {
       ) {
         return true;
       }
-      const keys = Object.getOwnPropertyNames(data) as Array<keyof typeof data>;
+      const keys = getOwnPropertyNames(data) as Array<keyof typeof data>;
       return keys.length > 0;
     }
     return false;
-  },
+  }
 
   children(data: unknown) {
     if (!this.hasChildren(data)) {
@@ -92,47 +114,69 @@ const objectTreeAdapter: TreeAdapter<unknown> = {
       }))
     );
     return children;
-  },
+  }
 
   render({
-    data,
-    name,
-    depth,
+    item,
+    depth = 0,
     isNonEnumerable,
+    parentPath,
   }: {
-    data: unknown;
-    name: string | undefined;
-    depth: number;
-    expanded: boolean;
+    item: TreeItem<unknown>;
+    depth?: number;
     isNonEnumerable?: boolean;
-  }) {
+    parentPath?: string;
+  }): TemplateResult {
+    const path =
+      parentPath === undefined
+        ? DEFAULT_ROOT_PATH
+        : `${parentPath}.${item.name}`;
+    const expanded = this.expandedPaths.get(path) ?? item.expanded ?? false;
+
     const renderedName =
-      typeof name === 'string' && name !== ''
+      typeof item.name === 'string' && item.name !== ''
         ? html`<ix-object-name
-            .name=${name}
+            .name=${item.name}
             .dimmed=${isNonEnumerable ?? false}
           ></ix-object-name>`
         : depth === 0
         ? undefined
-        : html`<ix-object-preview .data=${name}></ix-object-preview>`;
+        : html`<ix-object-preview .data=${item.name}></ix-object-preview>`;
 
     // The root level uses <ix-object-preview> to show a preview of a few
     // child properties. All other levels use <ix-object-value> to show the
     // value of the property.
     const renderedValue =
-      data instanceof MapEntries || data instanceof SetEntries
+      item.data instanceof MapEntries || item.data instanceof SetEntries
         ? undefined
         : depth === 0
-        ? html`<ix-object-preview .data=${data}></ix-object-preview>`
-        : html`<ix-object-value .data=${data}></ix-object-value>`;
+        ? html`<ix-object-preview .data=${item.data}></ix-object-preview>`
+        : html`<ix-object-value .data=${item.data}></ix-object-value>`;
 
     const separator =
       renderedName && renderedValue ? html`<span>: </span>` : undefined;
 
-    return html`<span>${renderedName}${separator}${renderedValue}</span>
-      <slot role="group"></slot>`;
-  },
-};
+    return html`<ix-tree-node
+      .item=${item}
+      .treeAdapter=${this}
+      .expanded=${expanded}
+      .showGutter=${depth > 0}
+      @toggle-expanded=${() => {
+        const expanded = this.expandedPaths.get(path) ?? item.expanded ?? false;
+        this.expandedPaths.set(path, !expanded);
+        this.#host.requestUpdate();
+      }}
+      ><span slot="label">${renderedName}${separator}${renderedValue}</span
+      >${map(this.children(item.data), (child) =>
+        this.render({
+          item: child,
+          depth: depth + 1,
+          parentPath: path,
+        })
+      )}</ix-tree-node
+    >`;
+  }
+}
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -195,14 +239,17 @@ declare global {
  */
 @customElement('ix-object-inspector')
 export class ObjectInspector extends LitElement {
-  static styles = css`
-    :host {
-      display: block;
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-  `;
+  static styles = [
+    baseStyles,
+    css`
+      :host {
+        display: block;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+    `,
+  ];
 
   /**
    * An integer specifying to which level the tree should be initially expanded.
@@ -242,13 +289,33 @@ export class ObjectInspector extends LitElement {
   sortObjectKeys: boolean | ((a: PropertyKey, b: PropertyKey) => number) =
     false;
 
+  #treeAdapter = new ObjectTreeAdapter(this);
+
+  protected willUpdate(changedProperties: PropertyValues): void {
+    if (
+      changedProperties.has('data') ||
+      changedProperties.has('expandPaths') ||
+      changedProperties.has('expandLevel')
+    ) {
+      const expandPaths = Array.isArray(this.expandPaths)
+        ? this.expandPaths
+        : this.expandPaths === undefined
+        ? []
+        : [this.expandPaths];
+      this.#treeAdapter.expandedPaths = getExpandedPaths(
+        this.data,
+        this.#treeAdapter,
+        expandPaths,
+        this.expandLevel,
+        this.#treeAdapter.expandedPaths
+      );
+      this.requestUpdate();
+    }
+  }
+
   render() {
-    return html`<ix-tree-view
-      .name=${this.name}
-      .data=${this.data}
-      .treeAdapter=${objectTreeAdapter}
-      .expandPaths=${this.expandPaths}
-      .expandLevel=${this.expandLevel}
-    ></ix-tree-view>`;
+    return this.#treeAdapter.render({
+      item: {data: this.data, name: this.name},
+    });
   }
 }

@@ -1,3 +1,5 @@
+// import {DEFAULT_ROOT_PATH} from './path-utils.js';
+
 /**
  * A value and its name.
  *
@@ -6,7 +8,7 @@
  * name.
  */
 export interface TreeItem<T> {
-  name: string;
+  name?: string;
   data: T;
 
   /**
@@ -24,6 +26,8 @@ export interface TreeItem<T> {
 }
 
 export interface TreeAdapter<T> {
+  expandedPaths: Map<string, boolean>;
+
   hasChildren(data: T): boolean;
 
   children(data: T): Array<TreeItem<T>> | undefined;
@@ -33,10 +37,18 @@ export interface TreeAdapter<T> {
    * slot-based children to be distributed to the tree node.
    */
   render(opts: {
-    data: T;
-    name: string | undefined;
-    depth: number;
-    expanded: boolean;
+    item: TreeItem<T>;
+    depth?: number;
     isNonEnumerable?: boolean;
+    parentPath?: string;
   }): unknown;
 }
+
+// export const renderRoot = <T>(adapter: TreeAdapter<T>, data: T) => {
+//   return adapter.render({
+//     item: {
+//       data,
+//     },
+//     depth: 0,
+//   });
+// };
