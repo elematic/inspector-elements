@@ -19,7 +19,7 @@ export default {
   render: ({name, data, expandLevel, expandPaths}) =>
     html`<ix-dom-inspector
       .name=${name}
-      .data=${data as DomNodeData}
+      .data=${data}
       .expandLevel=${expandLevel}
       .expandPaths=${expandPaths}
     ></ix-dom-inspector>`,

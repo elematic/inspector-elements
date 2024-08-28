@@ -8,7 +8,7 @@ import '../tree-view/tree-node.js';
 import './dom-close-tag.js';
 import './dom-node-preview.js';
 import {shouldInlineContent} from './should-inline.js';
-import {type DomNodeData, type ElementData, type ParentData} from './types.js';
+import {type DomNodeData, type ParentData} from './types.js';
 
 class DOMTreeAdapter implements TreeAdapter<DomNodeData> {
   #host: DOMInspector;
@@ -22,10 +22,7 @@ class DOMTreeAdapter implements TreeAdapter<DomNodeData> {
   hasChildren(data: DomNodeData): boolean {
     return (
       ((data as ParentData).childNodes?.length ?? 0) > 0 &&
-      !(
-        data.nodeType === Node.ELEMENT_NODE &&
-        shouldInlineContent(data as ElementData)
-      )
+      !(data.nodeType === Node.ELEMENT_NODE && shouldInlineContent(data))
     );
   }
 

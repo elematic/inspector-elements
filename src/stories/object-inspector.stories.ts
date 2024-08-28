@@ -35,10 +35,10 @@ export default {
 type Story = StoryObj<ObjectInspectorProps>;
 
 const map = new Map([['key', 'value']]);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 (map as any).foo = 'bar';
 const set = new Set(['foo', 'bar']);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
 (set as any).foo = 'bar';
 
 export const MixedObject: Story = {

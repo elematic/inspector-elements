@@ -123,7 +123,7 @@ export class ObjectValue extends LitElement {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 interface BufferConstructor extends Function {
   isBuffer: (object: unknown) => boolean;
 }

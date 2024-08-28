@@ -92,16 +92,13 @@ class ObjectTreeAdapter implements TreeAdapter<unknown> {
     } else {
       if (
         !Array.isArray(data) &&
-        typeof (data as unknown as Iterable<unknown>)[Symbol.iterator] ===
-          'function'
+        typeof (data as Iterable<unknown>)[Symbol.iterator] === 'function'
       ) {
         children.push(
-          ...(Array.isArray(data)
-            ? data
-            : Array.from(data as Iterable<unknown>).map((value, i) => ({
-                name: i.toString(),
-                data: value,
-              })))
+          ...Array.from(data as Iterable<unknown>).map((value, i) => ({
+            name: i.toString(),
+            data: value,
+          }))
         );
       }
     }
@@ -140,8 +137,8 @@ class ObjectTreeAdapter implements TreeAdapter<unknown> {
             .dimmed=${isNonEnumerable ?? false}
           ></ix-object-name>`
         : depth === 0
-        ? undefined
-        : html`<ix-object-preview .data=${item.name}></ix-object-preview>`;
+          ? undefined
+          : html`<ix-object-preview .data=${item.name}></ix-object-preview>`;
 
     // The root level uses <ix-object-preview> to show a preview of a few
     // child properties. All other levels use <ix-object-value> to show the
@@ -150,8 +147,8 @@ class ObjectTreeAdapter implements TreeAdapter<unknown> {
       item.data instanceof MapEntries || item.data instanceof SetEntries
         ? undefined
         : depth === 0
-        ? html`<ix-object-preview .data=${item.data}></ix-object-preview>`
-        : html`<ix-object-value .data=${item.data}></ix-object-value>`;
+          ? html`<ix-object-preview .data=${item.data}></ix-object-preview>`
+          : html`<ix-object-value .data=${item.data}></ix-object-value>`;
 
     const separator =
       renderedName && renderedValue ? html`<span>: </span>` : undefined;
@@ -300,8 +297,8 @@ export class ObjectInspector extends LitElement {
       const expandPaths = Array.isArray(this.expandPaths)
         ? this.expandPaths
         : this.expandPaths === undefined
-        ? []
-        : [this.expandPaths];
+          ? []
+          : [this.expandPaths];
       this.#treeAdapter.expandedPaths = getExpandedPaths(
         this.data,
         this.#treeAdapter,

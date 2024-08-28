@@ -38,13 +38,13 @@ export class DomNodePreview extends LitElement {
     }
 
     switch (data.nodeType) {
-      case Node.ELEMENT_NODE:
+      case Node.ELEMENT_NODE: {
         const content = this.expanded
           ? nothing
           : shouldInlineContent(data)
-          ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            (data.childNodes![0] as TextData).textContent
-          : '…';
+            ? // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              (data.childNodes![0] as TextData).textContent
+            : '…';
         return html`<span
           >${html`<ix-dom-open-tag
             .name=${data.tagName}
@@ -55,6 +55,7 @@ export class DomNodePreview extends LitElement {
                 .name=${data.tagName}
               ></ix-dom-close-tag>`}</span
         >`;
+      }
       case Node.TEXT_NODE:
         return html`<span>${data.textContent}</span>`;
       case Node.CDATA_SECTION_NODE:
@@ -77,6 +78,7 @@ export class DomNodePreview extends LitElement {
       case Node.DOCUMENT_FRAGMENT_NODE:
         return html`<span>${data.nodeName}</span>`;
       default:
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         data as void;
         return undefined;
     }

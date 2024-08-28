@@ -9,6 +9,7 @@ export function safeGetPropertyValue<T>(
     try {
       return descriptor.get();
     } catch {
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       return descriptor.get;
     }
   }

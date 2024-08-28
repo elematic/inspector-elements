@@ -106,7 +106,7 @@ export class TreeNode extends LitElement {
     `;
   }
 
-  #onClick(e: Event) {
+  #onClick = (e: Event) => {
     if (!this.#showArrow) {
       return;
     }
@@ -117,7 +117,7 @@ export class TreeNode extends LitElement {
       return;
     }
     this.dispatchEvent(new ToggleExpandedEvent());
-  }
+  };
 }
 
 export class ToggleExpandedEvent extends Event {
