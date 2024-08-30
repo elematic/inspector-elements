@@ -1,7 +1,7 @@
 import type {Preview} from '@storybook/web-components';
 import type {Package} from 'custom-elements-manifest';
-import {setCustomElementsManifest} from '@storybook/web-components';
-import customElements from '../custom-elements.json';
+// import {setCustomElementsManifest} from '@storybook/web-components';
+// import customElements from '../custom-elements.json';
 
 export const removeStatic = (customElements: Package): Package => {
   customElements = structuredClone(customElements);
@@ -19,7 +19,7 @@ export const removeStatic = (customElements: Package): Package => {
   return customElements;
 };
 
-setCustomElementsManifest(removeStatic(customElements as Package));
+// setCustomElementsManifest(removeStatic(customElements as Package));
 // setCustomElementsManifest(customElements as Package);
 
 export default {

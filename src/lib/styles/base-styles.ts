@@ -42,13 +42,7 @@ export const baseStyles = css`
     --ix-table-th-background-color: #eee;
     --ix-table-th-hover-color: hsla(0, 0%, 90%, 1);
     --ix-table-sort-icon-color: #6e6e6e;
-    --ix-table-data-background-image: linear-gradient(
-      to bottom,
-      white,
-      white 50%,
-      rgb(234, 243, 255) 50%,
-      rgb(234, 243, 255)
-    );
-    --ix-table-data-background-size: 128px 32px;
+    --ix-table-tr-even-background-color: rgb(234, 243, 255);
+    --ix-table-tr-odd-background-color: #fff;
   }
 `;

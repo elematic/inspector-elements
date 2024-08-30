@@ -1,4 +1,5 @@
 export const getOwnPropertyNames = Object.getOwnPropertyNames;
+export const hasOwn = Object.hasOwn;
 
 export function safeGetPropertyValue<T>(
   object: T,
