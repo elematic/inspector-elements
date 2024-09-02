@@ -1,6 +1,6 @@
 {
   "name": "inspector-elements",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "type": "module",
   "main": "index.js",
   "description": "Web components for visually inspecting objects",
