@@ -1,6 +1,21 @@
 # inspector-elements
 
-Web components for visually inspecting objects
+Web components for visually inspecting objects.
+
+Embed inspectors similar to Chrome's devtools inspectors in your web app. Works
+in any framework!
+
+### Object Inspector (`<ix-object-inspector`>)
+
+![object inspector](/images/object-inspector.png)
+
+### DOM Inspector (`<ix-dom-inspector`>)
+
+![dom inspector](/images/dom-inspector.png)
+
+### Table Inspector (`<ix-table-inspector`>)
+
+![table inspector](/images/table-inspector.png)
 
 ## Install
 
@@ -122,9 +137,11 @@ return html`<ix-table-inspector .data=${data}></ix-table-inspector>`;
 
 ## Status
 
-This port is very much in progress!
+This port is very much in progress! Rough first passes of object, dom, and table
+inspectors are done, but tests and stories are incomplete. There may be many
+bugs with cases that weren't covered during this initial development.
 
-- [ ] Elements
+- [x] Elements
   - [x] `<ix-object-inspector>`
   - [x] `<ix-dom-inspector>`
   - [x] `<ix-table-inspector>`
@@ -137,4 +154,4 @@ This port is very much in progress!
 
 ## Acknowledgements
 
-This is a web components port of the https://github.com/storybookjs/react-inspector
+This projecte started as a web components port of the https://github.com/storybookjs/react-inspector
